@@ -149,12 +149,17 @@
 <pre><code class="language-python">import belinda as bl
 import polars as pl
 
-g = bl.Graph(&quot;com-amazon.ungraph.txt&quot;) # the edgelist graph
-c = bl.read_membership(g, &quot;com-amazon.leiden.txt&quot;) # the membership as given by Leiden
-c_wo_trees = c.filter(pl.col('n') != pl.col('m') + 1) # trees: those clusters with n = m + 1
-bl.write_membership(g, c_wo_trees, &quot;com-amazon.leiden.wotrees.txt&quot;) # write the new membership
+# the edgelist graph
+g = bl.Graph(&quot;com-amazon.ungraph.txt&quot;)
+# the membership as given by Leiden
+c = bl.read_membership(g, &quot;com-amazon.leiden.txt&quot;)
+c_wo_trees = c.filter(pl.col('n') != pl.col('m') + 1)
+# `c_wo_trees` is a new set of clusters without &quot;trees&quot;, clusters with n = m + 1
 
-c_largish = c.filter(pl.col('n') &gt; 10) # clusters with more than 10 nodes
+# write the new membership
+bl.write_membership(g, c_wo_trees, &quot;com-amazon.leiden.wotrees.txt&quot;)
+
+c_largish = c.filter(pl.col('n') &gt; 10) # only take clusters with more than 10 nodes
 bl.write_membership(g, c_largish, &quot;com-amazon.leiden.largish.txt&quot;)
 </code></pre>
 <p>Now let’s check that these files indeed do exist:</p>
