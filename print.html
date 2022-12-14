@@ -85,7 +85,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="clustering_formats.html"><strong aria-hidden="true">2.</strong> Clustering Formats</a></li><li class="chapter-item expanded "><a href="quick_start.html"><strong aria-hidden="true">3.</strong> Quick Start</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="gather_statistics.html"><strong aria-hidden="true">3.1.</strong> Gathering Statistics</a></li><li class="chapter-item expanded "><a href="graph_data_frames.html"><strong aria-hidden="true">3.2.</strong> Graph Data Frames</a></li></ol></li><li class="chapter-item expanded "><a href="cookbook.html"><strong aria-hidden="true">4.</strong> Cookbook</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="conversion_to_parquet.html"><strong aria-hidden="true">4.1.</strong> Conversion to Parquet</a></li></ol></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="clustering_formats.html"><strong aria-hidden="true">2.</strong> Clustering Formats</a></li><li class="chapter-item expanded "><a href="quick_start.html"><strong aria-hidden="true">3.</strong> Quick Start</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="gather_statistics.html"><strong aria-hidden="true">3.1.</strong> Gathering Statistics</a></li><li class="chapter-item expanded "><a href="graph_data_frames.html"><strong aria-hidden="true">3.2.</strong> Graph Data Frames</a></li></ol></li><li class="chapter-item expanded "><a href="cookbook.html"><strong aria-hidden="true">4.</strong> Cookbook</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="conversion_to_parquet.html"><strong aria-hidden="true">4.1.</strong> Conversion to Parquet</a></li><li class="chapter-item expanded "><a href="filtering_out_clusters.html"><strong aria-hidden="true">4.2.</strong> Filtering out Clusters</a></li></ol></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -533,6 +533,22 @@ shape: (1, 1)
 <div style="break-before: page; page-break-before: always;"></div><h1 id="conversion-to-parquet"><a class="header" href="#conversion-to-parquet">Conversion to Parquet</a></h1>
 <pre><code class="language-python">import belinda as bl
 import polars as pl
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="filtering-out-clusters"><a class="header" href="#filtering-out-clusters">Filtering out Clusters</a></h1>
+<pre><code class="language-python">import belinda as bl
+import polars as pl
+
+g = bl.Graph(&quot;com-amazon.ungraph.txt&quot;) # the edgelist graph
+c = bl.read_membership(g, &quot;com-amazon.leiden.txt&quot;) # the membership as given by Leiden
+c_wo_trees = c.filter(pl.col('n') != pl.col('m') + 1) # trees: those clusters with n = m + 1
+bl.write_membership(g, c_wo_trees, &quot;com-amazon.leiden.wotrees.txt&quot;) # write the new membership
+
+c_largish = c.filter(pl.col('n') &gt; 10) # clusters with more than 10 nodes
+bl.write_membership(g, c_largish, &quot;com-amazon.leiden.largish.txt&quot;)
+</code></pre>
+<p>Now let’s check that these files indeed do exist:</p>
+<pre><code class="language-python">&gt;&gt;!wc -l com-amazon.leiden.wotrees.txt
+  230845 c_wo_trees.leiden.tsv
 </code></pre>
 
                     </main>
