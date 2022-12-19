@@ -147,12 +147,22 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p>Belinda allows using data frames to explore graph clusterings,
-with particular attention paid to community detection. It is designed
-for scalable exploratory data analysis and is an extension to <a href="https://pola-rs.github.io/polars-book/user-guide/introduction.html">Polars</a>.</p>
-<p>Here is an example showing how Belinda visualizes a clustering:</p>
+<p>Belinda is a high performance data science library for graph clusterings, developed
+as an add-on to the <a href="https://pola-rs.github.io/polars-book/user-guide/introduction.html">Polars</a> dataframes library.
+Belinda is designed with single-node scalability, performance, and ease of use in mind. It is mostly developed
+for studying community detection outputs (e.g., Leiden, VieClust, etc.).</p>
+<p>Belinda maps each cluster to a row inside a dataframe. This abstraction allows manipulating a clustering
+just like how one manipulates a dataframe. Moreover, calculating statistics, writing edited clusterings to disk,
+and some graph analytics (e.g., getting high degree nodes from a graph, and then seeing which clusters they belong to)
+are all made easy with Belinda.</p>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<p>Try the following</p>
+<pre><code class="language-bash">pip3 install --pre belinda # --pre is important. Belinda updates frequently
+</code></pre>
+<h2 id="five-minute-pitch"><a class="header" href="#five-minute-pitch">Five-minute pitch</a></h2>
+<p>Here is an example showing how Belinda explores a clustering:</p>
 <pre><code class="language-python"># interative prompt
-&gt;&gt;&gt; g.summary() # a graph loaded
+&gt;&gt;&gt; g.summary() # `g` already loaded
 shape: (1, 4)
 ┌────────┬────────┬────────────────┬───────────────────┐
 │ n      ┆ m      ┆ num_components ┆ largest_component │
@@ -162,7 +172,7 @@ shape: (1, 4)
 │ 334863 ┆ 925872 ┆ 1              ┆ 334863            │
 └────────┴────────┴────────────────┴───────────────────┘
 
-&gt;&gt;&gt; c # a data frame produced by Belinda
+&gt;&gt;&gt; c # a data frame of a clustering imported by Belinda
 shape: (85036, 6)
 ┌────────┬───────────────┬─────┬─────┬─────┬─────┐
 │ label  ┆ nodes         ┆ n   ┆ m   ┆ c   ┆ mcd │
@@ -199,10 +209,6 @@ shape: (1, 4)
 ╞════════════╪═══════════════╪═══════════════╪════════════════════════════════╡
 │ 60609      ┆ 0.927054      ┆ 0.5739        ┆ [0.000001, 0.000004, 0.000124] │
 └────────────┴───────────────┴───────────────┴────────────────────────────────┘
-</code></pre>
-<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
-<p>Try the following</p>
-<pre><code class="language-bash">pip3 install --pre belinda # --pre is important. Belinda updates frequently
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="quick-start"><a class="header" href="#quick-start">Quick Start</a></h1>
 <p>Belinda uses the following variable name conventions</p>
