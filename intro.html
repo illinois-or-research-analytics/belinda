@@ -150,7 +150,7 @@
 as an add-on to the <a href="https://pola-rs.github.io/polars-book/user-guide/introduction.html">Polars</a> dataframes library.
 Belinda is designed with single-node scalability, performance, and ease of use in mind. It is mostly developed
 for studying community detection outputs (e.g., Leiden, VieClust, etc.).</p>
-<p>Belinda maps each cluster to a row inside a dataframe. This abstraction allows manipulating a clustering
+<p>Belinda’s data model maps each cluster to a row inside a dataframe. This data model allows manipulating a clustering
 just like how one manipulates a dataframe. Moreover, calculating statistics, writing edited clusterings to disk,
 and some graph analytics (e.g., getting high degree nodes from a graph, and then seeing which clusters they belong to)
 are all made easy with Belinda.</p>
@@ -161,7 +161,7 @@ are all made easy with Belinda.</p>
 <h2 id="five-minute-pitch"><a class="header" href="#five-minute-pitch">Five-minute pitch</a></h2>
 <p>Here is an example showing how Belinda explores a clustering:</p>
 <pre><code class="language-python"># interative prompt
-&gt;&gt;&gt; g.summary() # `g` already loaded
+&gt;&gt;&gt; g.summary() # `g` a background graph we already loaded
 shape: (1, 4)
 ┌────────┬────────┬────────────────┬───────────────────┐
 │ n      ┆ m      ┆ num_components ┆ largest_component │
