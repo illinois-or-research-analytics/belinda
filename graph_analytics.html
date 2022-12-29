@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Clustering Formats and IO - Belinda User Guide</title>
+        <title>Graph Analytics - Belinda User Guide</title>
                 
 
         <!-- Custom HTML head -->
@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="quick_start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="gather_statistics.html"><strong aria-hidden="true">2.1.</strong> Gathering Statistics</a></li></ol></li><li class="chapter-item expanded "><a href="clustering_formats.html" class="active"><strong aria-hidden="true">3.</strong> Clustering Formats and IO</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="singleton_handling.html"><strong aria-hidden="true">3.1.</strong> Singleton Handling</a></li></ol></li><li class="chapter-item expanded "><a href="reference.html"><strong aria-hidden="true">4.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="predefined_statistics.html"><strong aria-hidden="true">4.1.</strong> Predefined Statistics</a></li><li class="chapter-item expanded "><a href="graph_analytics.html"><strong aria-hidden="true">4.2.</strong> Graph Analytics</a></li></ol></li><li class="chapter-item expanded "><a href="cookbook.html"><strong aria-hidden="true">5.</strong> Cookbook</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="conversion_to_parquet.html"><strong aria-hidden="true">5.1.</strong> Conversion to Parquet</a></li><li class="chapter-item expanded "><a href="filtering_out_clusters.html"><strong aria-hidden="true">5.2.</strong> Filtering out Clusters</a></li><li class="chapter-item expanded "><a href="basic_eda.html"><strong aria-hidden="true">5.3.</strong> Basic EDA</a></li></ol></li><li class="chapter-item expanded "><a href="acknowledgements.html"><strong aria-hidden="true">6.</strong> Acknowledgements</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="quick_start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="gather_statistics.html"><strong aria-hidden="true">2.1.</strong> Gathering Statistics</a></li></ol></li><li class="chapter-item expanded "><a href="clustering_formats.html"><strong aria-hidden="true">3.</strong> Clustering Formats and IO</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="singleton_handling.html"><strong aria-hidden="true">3.1.</strong> Singleton Handling</a></li></ol></li><li class="chapter-item expanded "><a href="reference.html"><strong aria-hidden="true">4.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="predefined_statistics.html"><strong aria-hidden="true">4.1.</strong> Predefined Statistics</a></li><li class="chapter-item expanded "><a href="graph_analytics.html" class="active"><strong aria-hidden="true">4.2.</strong> Graph Analytics</a></li></ol></li><li class="chapter-item expanded "><a href="cookbook.html"><strong aria-hidden="true">5.</strong> Cookbook</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="conversion_to_parquet.html"><strong aria-hidden="true">5.1.</strong> Conversion to Parquet</a></li><li class="chapter-item expanded "><a href="filtering_out_clusters.html"><strong aria-hidden="true">5.2.</strong> Filtering out Clusters</a></li><li class="chapter-item expanded "><a href="basic_eda.html"><strong aria-hidden="true">5.3.</strong> Basic EDA</a></li></ol></li><li class="chapter-item expanded "><a href="acknowledgements.html"><strong aria-hidden="true">6.</strong> Acknowledgements</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -145,65 +145,97 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="clustering-formats-and-io"><a class="header" href="#clustering-formats-and-io">Clustering Formats and IO</a></h1>
-<h2 id="membership-format"><a class="header" href="#membership-format">Membership format</a></h2>
-<p>A format where each line has a “membership assignment” in the form
-<code>node_id&lt;tab&gt;cluster_id</code>, assigning a node to a specific cluster.</p>
-<p>Example (note that I used spaces as tabs below):</p>
-<pre><code>0   1
-1   1
-2   1
-3   2
-4   2
-5   2
+                        <h1 id="graph-analytics"><a class="header" href="#graph-analytics">Graph Analytics</a></h1>
+<p>Belinda is not designed to be the full-fledged solution
+to undirected graph analytics. Here we show the limited features provided.</p>
+<p>Assume that <code>g</code> is a <code>bl.Graph</code>.</p>
+<h2 id="gsummary"><a class="header" href="#gsummary"><code>g.summary()</code></a></h2>
+<p>Convenience method producing a dataframe of some summary statistics.</p>
+<pre><code class="language-python">&gt;&gt;&gt; g.summary()
+shape: (1, 4)
+┌────────┬────────┬────────────────┬───────────────────┐
+│ n      ┆ m      ┆ num_components ┆ largest_component │
+│ ---    ┆ ---    ┆ ---            ┆ ---               │
+│ u32    ┆ u64    ┆ u32            ┆ u32               │
+╞════════╪════════╪════════════════╪═══════════════════╡
+│ 334863 ┆ 925872 ┆ 1              ┆ 334863            │
+└────────┴────────┴────────────────┴───────────────────┘
 </code></pre>
-<p>The above clustering contains two clusters each of size three.</p>
-<p>Used by Leiden and presumably other clustering methods. This is a very “raw” format. Notably,
-it is very hard to individually annotate clusters to
-have extra information (e.g. quality about that cluster).</p>
-<h3 id="io-operations"><a class="header" href="#io-operations">IO operations</a></h3>
-<ul>
-<li><code>bl.read_membership(g, filename, sep = '\t', mode = bl.SingletonMode.AsIs)</code> reads the <code>sep</code> separated membership format.</li>
-<li><code>bl.write_membership(g, clus, filename)</code> writes the <code>clus</code> cluster data frame in membership format to <code>filename</code>.</li>
-<li><code>bl.read_membership_series(g, node_series, cluster_series, mode = bl.SingletonMode.AsIs)</code> takes the nodes (specified as <code>node_series</code>, a Polars <code>Series</code>) and the clusters correspondingly assigned (specified as <code>cluster_series</code>) and returns the cluster data frame. This is useful for parsing custom membership formats.
-<ul>
-<li>For example, <code>df = pl.read_csv(&quot;out.csv&quot;)</code> and then <code>bl.read_membership_series(g, df['node'], df['cluster'])</code> can be a good pairing</li>
-</ul>
-</li>
-</ul>
-<h2 id="json-format"><a class="header" href="#json-format">JSON format</a></h2>
-<p>Designed by Belinda to be an easily consumable
-and producible “sane” format for clustering.
-This new-line delimited JSON format has each line
-representing a cluster, and in its bare form like this:</p>
-<pre><code>{&quot;label&quot;: 0, &quot;nodes&quot;: [0, 1, 2]}
-{&quot;label&quot;: 1, &quot;nodes&quot;: [3, 4, 5]}
+<h2 id="gnodesclusteringnone-verbosefalse"><a class="header" href="#gnodesclusteringnone-verbosefalse"><code>g.nodes(clustering=None, verbose=False)</code></a></h2>
+<blockquote>
+<p>This feature is experimental, and the API may change.</p>
+</blockquote>
+<p>A table of nodes, depending on the arguments can achieve various things:</p>
+<pre><code>&gt;&gt;&gt; g.nodes() # a table of nodes with degrees
+shape: (334863, 2)
+┌────────┬────────┐
+│ node   ┆ degree │
+│ ---    ┆ ---    │
+│ u32    ┆ u32    │
+╞════════╪════════╡
+│ 1      ┆ 8      │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┤
+│ 88160  ┆ 7      │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┤
+│ 118052 ┆ 18     │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┤
+│ 161555 ┆ 31     │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┤
+│ ...    ┆ ...    │
 </code></pre>
-<p>Additional attributes are encouraged, for example, the following is also a valid cluster:</p>
-<pre><code>{&quot;label&quot;: 0, &quot;nodes&quot;: [0, 1, 2], &quot;connectivity&quot;: 1}
+<p>Setting <code>verbose=True</code> will also print out the adjacency list:</p>
+<pre><code>&gt;&gt;&gt; g.nodes(verbose=True)
+shape: (334863, 3)
+┌────────┬────────┬─────────────────────────────┐
+│ node   ┆ degree ┆ adj                         │
+│ ---    ┆ ---    ┆ ---                         │
+│ u32    ┆ u32    ┆ list[u32]                   │
+╞════════╪════════╪═════════════════════════════╡
+│ 1      ┆ 8      ┆ [88160, 118052, ... 500600] │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 88160  ┆ 7      ┆ [1, 161555, ... 102091]     │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 118052 ┆ 18     ┆ [1, 161555, ... 479787]     │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 161555 ┆ 31     ┆ [1, 88160, ... 470778]      │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ ...    ┆ ...    ┆ ...                         │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 548085 ┆ 1      ┆ [548091]                    │
 </code></pre>
-<p>The only hard requirements are:</p>
-<ul>
-<li>Each object should have a “node” property of type <code>number[]</code> (but should in fact be integers)</li>
-<li>Each object should have a “label” property of any type (that is internally consistent for the clustering)</li>
-</ul>
-<p>Extra properties are supported and will be loaded into the data frame.</p>
-<p>The JSON format is designed to be usable with tools such as <code>jq</code>.</p>
-<h3 id="io-operations-1"><a class="header" href="#io-operations-1">IO operations</a></h3>
-<ul>
-<li><code>bl.read_json(g, filename, mode = bl.SingletonMode.AsIs)</code> reads the JSON format.</li>
-<li><code>bl.write_json(g, clus, filename)</code> writes the <code>clus</code> cluster data frame in JSON format to <code>filename</code>.</li>
-</ul>
+<p>Given a clustering, the final result includes the labels for each node.
+This is an unstable API, and to support overlapping clusters
+each node can be assigned to multiple clusters.</p>
+<pre><code>&gt;&gt;&gt; g.nodes(c)
+shape: (334863, 3)
+┌────────┬────────┬───────────┐
+│ node   ┆ degree ┆ labels    │
+│ ---    ┆ ---    ┆ ---       │
+│ u32    ┆ u32    ┆ list[u32] │
+╞════════╪════════╪═══════════╡
+│ 1      ┆ 8      ┆ [18951]   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ 88160  ┆ 7      ┆ [18951]   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ 118052 ┆ 18     ┆ [35215]   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ 161555 ┆ 31     ┆ [18951]   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ ...    ┆ ...    ┆ ...       │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ 548085 ┆ 1      ┆ [295065]  │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="gather_statistics.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="predefined_statistics.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="singleton_handling.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="cookbook.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -213,11 +245,11 @@ representing a cluster, and in its bare form like this:</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="gather_statistics.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="predefined_statistics.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="singleton_handling.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="cookbook.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>

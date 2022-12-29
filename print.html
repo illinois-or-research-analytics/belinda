@@ -85,7 +85,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="quick_start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="gather_statistics.html"><strong aria-hidden="true">2.1.</strong> Gathering Statistics</a></li></ol></li><li class="chapter-item expanded "><a href="clustering_formats.html"><strong aria-hidden="true">3.</strong> Clustering Formats and IO</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="singleton_handling.html"><strong aria-hidden="true">3.1.</strong> Singleton Handling</a></li></ol></li><li class="chapter-item expanded "><a href="cookbook.html"><strong aria-hidden="true">4.</strong> Cookbook</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="conversion_to_parquet.html"><strong aria-hidden="true">4.1.</strong> Conversion to Parquet</a></li><li class="chapter-item expanded "><a href="filtering_out_clusters.html"><strong aria-hidden="true">4.2.</strong> Filtering out Clusters</a></li><li class="chapter-item expanded "><a href="basic_eda.html"><strong aria-hidden="true">4.3.</strong> Basic EDA</a></li></ol></li><li class="chapter-item expanded "><a href="acknowledgements.html"><strong aria-hidden="true">5.</strong> Acknowledgements</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="quick_start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="gather_statistics.html"><strong aria-hidden="true">2.1.</strong> Gathering Statistics</a></li></ol></li><li class="chapter-item expanded "><a href="clustering_formats.html"><strong aria-hidden="true">3.</strong> Clustering Formats and IO</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="singleton_handling.html"><strong aria-hidden="true">3.1.</strong> Singleton Handling</a></li></ol></li><li class="chapter-item expanded "><a href="reference.html"><strong aria-hidden="true">4.</strong> API Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="predefined_statistics.html"><strong aria-hidden="true">4.1.</strong> Predefined Statistics</a></li><li class="chapter-item expanded "><a href="graph_analytics.html"><strong aria-hidden="true">4.2.</strong> Graph Analytics</a></li></ol></li><li class="chapter-item expanded "><a href="cookbook.html"><strong aria-hidden="true">5.</strong> Cookbook</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="conversion_to_parquet.html"><strong aria-hidden="true">5.1.</strong> Conversion to Parquet</a></li><li class="chapter-item expanded "><a href="filtering_out_clusters.html"><strong aria-hidden="true">5.2.</strong> Filtering out Clusters</a></li><li class="chapter-item expanded "><a href="basic_eda.html"><strong aria-hidden="true">5.3.</strong> Basic EDA</a></li></ol></li><li class="chapter-item expanded "><a href="acknowledgements.html"><strong aria-hidden="true">6.</strong> Acknowledgements</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -622,6 +622,158 @@ the clusters. For example, the following statement will read clusters but ignore
 <p>Some clustering methods expect continuous node ids from the input graphs.
 That is, if the input file has nodeset <code>{0, 3}</code>, then the clustering method
 will actually create four nodes (<code>{0, 1, 2, 3}</code>) in total. These padded nodes are called “dummy nodes”. First, Belinda does not create dummy nodes unlike some other software. Second, Belinda, when parsing clusters, actually actively <em>removes</em> these dummy nodes when seeing them.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="reference"><a class="header" href="#reference">Reference</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="predefined-statistics"><a class="header" href="#predefined-statistics">Predefined Statistics</a></h1>
+<p>Given a graph <code>g</code>, Belinda provides these “quality measures” for clusters dependent on
+the graph <code>g</code>.
+Note that statistics such as <code>mcd</code> are already provided in the columns for the data frame.</p>
+<h2 id="gn-gm"><a class="header" href="#gn-gm"><code>g.n</code>, <code>g.m</code></a></h2>
+<p>These are shorthands, <code>g.n</code> is the number of nodes, and <code>g.m</code> is the number of edges
+for the entire graph.</p>
+<h2 id="gmodularityr1"><a class="header" href="#gmodularityr1"><code>g.modularity(r=1)</code></a></h2>
+<p>“Vanilla” modularity measure of a cluster with resolution defaulting to 1, defined somewhat as:</p>
+<pre><code class="language-python"># degree volume
+vol = (col(&quot;m&quot;) * 2 + col(&quot;c&quot;)).alias(&quot;vol&quot;)
+
+def modularity(self, r=1):
+    big_l = self.m
+    return (col(&quot;m&quot;) / big_l - r * (vol / (2 * big_l)) ** 2).alias(&quot;modularity&quot;)
+</code></pre>
+<h3 id="example"><a class="header" href="#example">Example</a></h3>
+<pre><code class="language-python">&gt;&gt;&gt; c.head(5) # assuming clustering `c` already loaded
+shape: (5, 6)
+┌────────┬───────────────┬─────┬─────┬─────┬─────┐
+│ label  ┆ nodes         ┆ n   ┆ m   ┆ c   ┆ mcd │
+│ ---    ┆ ---           ┆ --- ┆ --- ┆ --- ┆ --- │
+│ i64    ┆ binary        ┆ u64 ┆ u64 ┆ u64 ┆ u64 │
+╞════════╪═══════════════╪═════╪═════╪═════╪═════╡
+│ 34680  ┆ [binary data] ┆ 4   ┆ 3   ┆ 11  ┆ 1   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┤
+│ 298616 ┆ [binary data] ┆ 1   ┆ 0   ┆ 2   ┆ 0   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┤
+│ 45248  ┆ [binary data] ┆ 3   ┆ 2   ┆ 10  ┆ 1   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┤
+│ 297168 ┆ [binary data] ┆ 1   ┆ 0   ┆ 2   ┆ 0   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┤
+│ 294432 ┆ [binary data] ┆ 1   ┆ 0   ┆ 5   ┆ 0   │
+└────────┴───────────────┴─────┴─────┴─────┴─────┘
+
+&gt;&gt;&gt; c.head(5).with_column(g.modularity())
+shape: (5, 7)
+┌────────┬───────────────┬─────┬─────┬─────┬─────┬─────────────┐
+│ label  ┆ nodes         ┆ n   ┆ m   ┆ c   ┆ mcd ┆ modularity  │
+│ ---    ┆ ---           ┆ --- ┆ --- ┆ --- ┆ --- ┆ ---         │
+│ i64    ┆ binary        ┆ u64 ┆ u64 ┆ u64 ┆ u64 ┆ f64         │
+╞════════╪═══════════════╪═════╪═════╪═════╪═════╪═════════════╡
+│ 34680  ┆ [binary data] ┆ 4   ┆ 3   ┆ 11  ┆ 1   ┆ 0.000003    │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 298616 ┆ [binary data] ┆ 1   ┆ 0   ┆ 2   ┆ 0   ┆ -1.1665e-12 │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 45248  ┆ [binary data] ┆ 3   ┆ 2   ┆ 10  ┆ 1   ┆ 0.000002    │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 297168 ┆ [binary data] ┆ 1   ┆ 0   ┆ 2   ┆ 0   ┆ -1.1665e-12 │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 294432 ┆ [binary data] ┆ 1   ┆ 0   ┆ 5   ┆ 0   ┆ -7.2908e-12 │
+└────────┴───────────────┴─────┴─────┴─────┴─────┴─────────────┘
+</code></pre>
+<h2 id="gconductance"><a class="header" href="#gconductance"><code>g.conductance()</code></a></h2>
+<p>Intra-cluster conductance, defined somewhat as:</p>
+<pre><code class="language-python">def vol1(self):
+    complement = 2 * self.m - vol
+    return when(vol &gt; complement).then(complement).otherwise(vol).alias(&quot;vol1&quot;)
+
+
+def conductance(self):
+    return (
+        when(col(&quot;n&quot;) &gt; 1)
+        .then((col(&quot;c&quot;) / self.vol1()))
+        .otherwise(None)
+        .alias(&quot;conductance&quot;)
+    )
+</code></pre>
+<h2 id="gcpmr"><a class="header" href="#gcpmr"><code>g.cpm(r)</code></a></h2>
+<p>Constant Potts model with resolution value <code>r</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="graph-analytics"><a class="header" href="#graph-analytics">Graph Analytics</a></h1>
+<p>Belinda is not designed to be the full-fledged solution
+to undirected graph analytics. Here we show the limited features provided.</p>
+<p>Assume that <code>g</code> is a <code>bl.Graph</code>.</p>
+<h2 id="gsummary"><a class="header" href="#gsummary"><code>g.summary()</code></a></h2>
+<p>Convenience method producing a dataframe of some summary statistics.</p>
+<pre><code class="language-python">&gt;&gt;&gt; g.summary()
+shape: (1, 4)
+┌────────┬────────┬────────────────┬───────────────────┐
+│ n      ┆ m      ┆ num_components ┆ largest_component │
+│ ---    ┆ ---    ┆ ---            ┆ ---               │
+│ u32    ┆ u64    ┆ u32            ┆ u32               │
+╞════════╪════════╪════════════════╪═══════════════════╡
+│ 334863 ┆ 925872 ┆ 1              ┆ 334863            │
+└────────┴────────┴────────────────┴───────────────────┘
+</code></pre>
+<h2 id="gnodesclusteringnone-verbosefalse"><a class="header" href="#gnodesclusteringnone-verbosefalse"><code>g.nodes(clustering=None, verbose=False)</code></a></h2>
+<blockquote>
+<p>This feature is experimental, and the API may change.</p>
+</blockquote>
+<p>A table of nodes, depending on the arguments can achieve various things:</p>
+<pre><code>&gt;&gt;&gt; g.nodes() # a table of nodes with degrees
+shape: (334863, 2)
+┌────────┬────────┐
+│ node   ┆ degree │
+│ ---    ┆ ---    │
+│ u32    ┆ u32    │
+╞════════╪════════╡
+│ 1      ┆ 8      │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┤
+│ 88160  ┆ 7      │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┤
+│ 118052 ┆ 18     │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┤
+│ 161555 ┆ 31     │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┤
+│ ...    ┆ ...    │
+</code></pre>
+<p>Setting <code>verbose=True</code> will also print out the adjacency list:</p>
+<pre><code>&gt;&gt;&gt; g.nodes(verbose=True)
+shape: (334863, 3)
+┌────────┬────────┬─────────────────────────────┐
+│ node   ┆ degree ┆ adj                         │
+│ ---    ┆ ---    ┆ ---                         │
+│ u32    ┆ u32    ┆ list[u32]                   │
+╞════════╪════════╪═════════════════════════════╡
+│ 1      ┆ 8      ┆ [88160, 118052, ... 500600] │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 88160  ┆ 7      ┆ [1, 161555, ... 102091]     │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 118052 ┆ 18     ┆ [1, 161555, ... 479787]     │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 161555 ┆ 31     ┆ [1, 88160, ... 470778]      │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ ...    ┆ ...    ┆ ...                         │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 548085 ┆ 1      ┆ [548091]                    │
+</code></pre>
+<p>Given a clustering, the final result includes the labels for each node.
+This is an unstable API, and to support overlapping clusters
+each node can be assigned to multiple clusters.</p>
+<pre><code>&gt;&gt;&gt; g.nodes(c)
+shape: (334863, 3)
+┌────────┬────────┬───────────┐
+│ node   ┆ degree ┆ labels    │
+│ ---    ┆ ---    ┆ ---       │
+│ u32    ┆ u32    ┆ list[u32] │
+╞════════╪════════╪═══════════╡
+│ 1      ┆ 8      ┆ [18951]   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ 88160  ┆ 7      ┆ [18951]   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ 118052 ┆ 18     ┆ [35215]   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ 161555 ┆ 31     ┆ [18951]   │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ ...    ┆ ...    ┆ ...       │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ 548085 ┆ 1      ┆ [295065]  │
+├╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cookbook"><a class="header" href="#cookbook">Cookbook</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="conversion-to-parquet"><a class="header" href="#conversion-to-parquet">Conversion to Parquet</a></h1>
 <p>Since Polars data frames are Apache Arrow based, conversion to Parquet is quite easy and lossless, useful for storage.</p>
