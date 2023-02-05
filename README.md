@@ -1,0 +1,2 @@
+As of 2023, due to macroeconomics conditions, we unfortunately have to say goodbye to Belinda due to
+the lack of monetary resources to sustain development outside the funding using our developers' personal time. As such, we made the difficult decision to sunset Belinda.
