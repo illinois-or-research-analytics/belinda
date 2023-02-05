@@ -1,2 +1,4 @@
-As of 2023, due to macroeconomics conditions, we unfortunately have to say goodbye to Belinda due to
-the lack of monetary resources to sustain development outside the funding using our developers' personal time. As such, we made the difficult decision to sunset Belinda.
+We have sunset Belinda due to lack of interest and developer resources. We welcome continued development
+of Belinda by the community. Please contact us if you are interested in taking over the project.
+
+Baqiao
